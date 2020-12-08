@@ -1,7 +1,7 @@
 Make Reduced From Partition
 ================
 Steven Wolf
-12/8/2020
+2020-12-08
 
 ## Setup for the new function `make_reduced_from_partition`
 
@@ -32,6 +32,9 @@ library(viridis)
 ``` r
 source('mrfp.R')
 ```
+
+This function will be added to the `concorR` repository on my fork in
+the next few days.
 
 ## Proof of concept
 
@@ -195,4 +198,4 @@ make_reduced_from_partition
     ##         stop("Statistics implemented for determining edges in reduced networks are only \n         density and degree.")
     ##     }
     ## }
-    ## <bytecode: 0x564cbd51ff88>
+    ## <bytecode: 0x562ca8056d88>
