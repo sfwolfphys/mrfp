@@ -2,7 +2,7 @@
 title: "Make Reduced From Partition"
 author: "Steven Wolf"
 date: "12/8/2020"
-output: html_document
+output: github_document
 ---
 
 ## Setup for the new function `make_reduced_from_partition`
