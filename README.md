@@ -24,6 +24,12 @@ library(igraph)
     ##     union
 
 ``` r
+library(viridis)
+```
+
+    ## Loading required package: viridisLite
+
+``` r
 source('mrfp.R')
 ```
 
@@ -42,6 +48,15 @@ ebc.g  <- edge.betweenness.community(g)
 ebPart  <- list(ebc.g$membership)
 ```
 
+Show the whole network:
+
+``` r
+vColor = viridis(max(unlist(ebPart)))
+plot(g, vertex.color = vColor[ebc.g$membership])
+```
+
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
 First, let’s show that the reduced network works for the degree
 statistic:
 
@@ -50,7 +65,7 @@ g.red  <- make_reduced_from_partition(list(g_adj), ebPart, stat='degree')
 plot_reduced(make_reduced_igraph(g.red$reduced_mat[[1]]))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 And now, the density statistic:
 
@@ -59,7 +74,7 @@ g.red.den  <- make_reduced_from_partition(list(g_adj), ebPart, stat='density')
 plot_reduced(make_reduced_igraph(g.red.den$reduced_mat[[1]]))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ## Full function text
 
@@ -180,4 +195,4 @@ make_reduced_from_partition
     ##         stop("Statistics implemented for determining edges in reduced networks are only \n         density and degree.")
     ##     }
     ## }
-    ## <bytecode: 0x563b30619218>
+    ## <bytecode: 0x564cbd51ff88>

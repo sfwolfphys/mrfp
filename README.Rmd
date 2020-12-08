@@ -11,6 +11,7 @@ Load all libraries and load the new function
 ```{r}
 library(concorR)
 library(igraph)
+library(viridis)
 
 source('mrfp.R')
 ```
@@ -24,6 +25,13 @@ g_adj  <- as.matrix(as_adjacency_matrix(g))
 ebc.g  <- edge.betweenness.community(g)
 ebPart  <- list(ebc.g$membership)
 ```
+
+Show the whole network:
+```{r}
+vColor = viridis(max(unlist(ebPart)))
+plot(g, vertex.color = vColor[ebc.g$membership])
+```
+
 
 First, let's show that the reduced network works for the degree statistic:
 ```{r}
