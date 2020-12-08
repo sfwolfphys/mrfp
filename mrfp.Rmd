@@ -1,0 +1,48 @@
+---
+title: "Make Reduced From Partition"
+author: "Steven Wolf"
+date: "12/8/2020"
+output: html_document
+---
+
+## Setup for the new function `make_reduced_from_partition`
+Load all libraries and load the new function 
+
+```{r}
+library(concorR)
+library(igraph)
+
+source('mrfp.R')
+```
+
+## Proof of concept
+I messed with `edge_betweenness` to find communities in the examples in the standard README for `concorR`.  They were not instructive (only one community), so I abandoned that.  Instead, I have created a random network and found communities there:
+```{r}
+set.seed(1234)
+g  <-  erdos.renyi.game(50,p=0.2)
+g_adj  <- as.matrix(as_adjacency_matrix(g))
+ebc.g  <- edge.betweenness.community(g)
+ebPart  <- list(ebc.g$membership)
+```
+
+First, let's show that the reduced network works for the degree statistic:
+```{r}
+g.red  <- make_reduced_from_partition(list(g_adj), ebPart, stat='degree')
+plot_reduced(make_reduced_igraph(g.red$reduced_mat[[1]]))
+```
+
+And now, the density statistic:
+```{r}
+g.red.den  <- make_reduced_from_partition(list(g_adj), ebPart, stat='density')
+plot_reduced(make_reduced_igraph(g.red.den$reduced_mat[[1]]))
+```
+
+## Full function text
+```{r}
+make_reduced_from_partition
+```
+
+
+
+
+
