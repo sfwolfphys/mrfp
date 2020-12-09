@@ -196,5 +196,5 @@ make_reduced_from_partition
     ##         stop("Statistics implemented for determining edges in reduced networks are only \n         density and degree.")
     ##     }
     ## }
-    ## <bytecode: 0x55ce4cdc59c8>
+    ## <bytecode: 0x560efc214298>
     ## <environment: namespace:concorR>
