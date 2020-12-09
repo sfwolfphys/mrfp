@@ -38,6 +38,12 @@ the next few days.
 
 ## Proof of concept
 
+Note: given the fact that we have an existing network/partition, I
+decided to make the input be a single adjacency matrix/partition rather
+than a list of adjacency matricies/partitions. We want to have the list
+input for the other method because concor uses list inputs. However, it
+is superfluous here.
+
 I messed with `edge_betweenness` to find communities in the examples in
 the standard README for `concorR`. They were not instructive (only one
 community), so I abandoned that. Instead, I have created a random
@@ -48,7 +54,7 @@ set.seed(1234)
 g  <-  erdos.renyi.game(50,p=0.2)
 g_adj  <- as.matrix(as_adjacency_matrix(g))
 ebc.g  <- edge.betweenness.community(g)
-ebPart  <- list(ebc.g$membership)
+ebPart  <- ebc.g$membership
 ```
 
 Show the whole network:
@@ -64,8 +70,8 @@ First, let’s show that the reduced network works for the degree
 statistic:
 
 ``` r
-g.red  <- make_reduced_from_partition(list(g_adj), ebPart, stat='degree')
-plot_reduced(make_reduced_igraph(g.red$reduced_mat[[1]]))
+g.red  <- make_reduced_from_partition(g_adj, ebPart, stat='degree')
+plot_reduced(make_reduced_igraph(g.red$reduced_mat))
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
@@ -73,8 +79,8 @@ plot_reduced(make_reduced_igraph(g.red$reduced_mat[[1]]))
 And now, the density statistic:
 
 ``` r
-g.red.den  <- make_reduced_from_partition(list(g_adj), ebPart, stat='density')
-plot_reduced(make_reduced_igraph(g.red.den$reduced_mat[[1]]))
+g.red.den  <- make_reduced_from_partition(g_adj, ebPart, stat='density')
+plot_reduced(make_reduced_igraph(g.red.den$reduced_mat))
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
@@ -85,112 +91,98 @@ plot_reduced(make_reduced_igraph(g.red.den$reduced_mat[[1]]))
 make_reduced_from_partition
 ```
 
-    ## function (adj_list, partition_list, stat = "density") 
+    ## function (adj_mat, partition, stat = "density") 
     ## {
     ##     if (stat == "density") {
-    ##         dens_vec <- sapply(adj_list, function(x) .edge_dens(x))
-    ##         mat_return <- vector("list", length = length(dens_vec))
-    ##         for (i in 1:length(dens_vec)) {
-    ##             this_adj_mat = adj_list[[i]]
-    ##             thisBlk = partition_list[[i]]
-    ##             nb = max(thisBlk)
-    ##             reduced_den = matrix(0, nrow = nb, ncol = nb)
-    ##             rownames(reduced_den) = paste("Block", 1:nb)
-    ##             colnames(reduced_den) = paste("Block", 1:nb)
-    ##             for (j in 1:nb) {
-    ##                 nRows = sum(j == thisBlk)
-    ##                 for (k in 1:nb) {
-    ##                   nCols = sum(k == thisBlk)
-    ##                   if (nRows == 1) {
-    ##                     if (nCols == 1) {
-    ##                       blk_adj_mat = this_adj_mat[j == thisBlk, 
-    ##                         k == thisBlk]
-    ##                       d = ifelse(blk_adj_mat > 0, 1, 0)
-    ##                     }
-    ##                     else {
-    ##                       blk_adj_mat = this_adj_mat[j == thisBlk, 
-    ##                         k == thisBlk]
-    ##                       blk_adj_mat = matrix(blk_adj_mat, nrow = 1)
-    ##                       d = .block_edge_dens(blk_adj_mat)
-    ##                     }
+    ##         dens <- .edge_dens(adj_mat)
+    ##         nb = max(partition)
+    ##         reduced_den = matrix(0, nrow = nb, ncol = nb)
+    ##         rownames(reduced_den) = paste("Block", 1:nb)
+    ##         colnames(reduced_den) = paste("Block", 1:nb)
+    ##         for (j in 1:nb) {
+    ##             nRows = sum(j == partition)
+    ##             for (k in 1:nb) {
+    ##                 nCols = sum(k == partition)
+    ##                 if (nRows == 1) {
+    ##                   if (nCols == 1) {
+    ##                     blk_adj_mat = adj_mat[j == partition, k == 
+    ##                       partition]
+    ##                     d = ifelse(blk_adj_mat > 0, 1, 0)
     ##                   }
     ##                   else {
-    ##                     if (nCols == 1) {
-    ##                       blk_adj_mat = this_adj_mat[j == thisBlk, 
-    ##                         k == thisBlk]
-    ##                       blk_adj_mat = matrix(blk_adj_mat, ncol = 1)
-    ##                     }
-    ##                     else {
-    ##                       blk_adj_mat = this_adj_mat[j == thisBlk, 
-    ##                         k == thisBlk]
-    ##                     }
-    ##                     d = ifelse(i == j, .edge_dens(blk_adj_mat), 
-    ##                       .block_edge_dens(blk_adj_mat))
+    ##                     blk_adj_mat = adj_mat[j == partition, k == 
+    ##                       partition]
+    ##                     blk_adj_mat = matrix(blk_adj_mat, nrow = 1)
+    ##                     d = .block_edge_dens(blk_adj_mat)
     ##                   }
-    ##                   reduced_den[j, k] = d
     ##                 }
+    ##                 else {
+    ##                   if (nCols == 1) {
+    ##                     blk_adj_mat = adj_mat[j == partition, k == 
+    ##                       partition]
+    ##                     blk_adj_mat = matrix(blk_adj_mat, ncol = 1)
+    ##                   }
+    ##                   else {
+    ##                     blk_adj_mat = adj_mat[j == partition, k == 
+    ##                       partition]
+    ##                   }
+    ##                   d = ifelse(j == k, .edge_dens(blk_adj_mat), 
+    ##                     .block_edge_dens(blk_adj_mat))
+    ##                 }
+    ##                 reduced_den[j, k] = d
     ##             }
-    ##             temp1 <- reduced_den
-    ##             temp1[is.nan(temp1)] <- 0
-    ##             temp1[temp1 < dens_vec[[i]]] <- 0
-    ##             temp1[temp1 > 0] <- 1
-    ##             mat_return[[i]] <- temp1
     ##         }
+    ##         reduced_den[is.nan(reduced_den)] <- 0
+    ##         reduced_den[reduced_den < dens] <- 0
+    ##         reduced_den[reduced_den > 0] <- 1
     ##         return_list <- list()
-    ##         return_list$reduced_mat <- mat_return
-    ##         return_list$dens <- dens_vec
+    ##         return_list$reduced_mat <- reduced_den
+    ##         return_list$dens <- dens
     ##         return(return_list)
     ##     }
     ##     else if (stat == "degree") {
-    ##         outdegree = lapply(adj_list, function(x) .scaledDegree(x))
-    ##         mat_return <- vector("list", length = length(outdegree))
-    ##         for (i in 1:length(outdegree)) {
-    ##             this_adj_mat = adj_list[[i]]
-    ##             thisBlk = partition_list[[i]]
-    ##             nb = max(thisBlk)
-    ##             reduced_degree = matrix(0, nrow = nb, ncol = nb)
-    ##             rownames(reduced_degree) = paste("Block", 1:nb)
-    ##             colnames(reduced_degree) = paste("Block", 1:nb)
-    ##             for (j in 1:nb) {
-    ##                 nRows = sum(j == thisBlk)
-    ##                 for (k in 1:nb) {
-    ##                   nCols = sum(k == thisBlk)
-    ##                   if (nRows == 1) {
-    ##                     if (nCols == 1) {
-    ##                       blk_adj_mat = this_adj_mat[j == thisBlk, 
-    ##                         k == thisBlk]
-    ##                       outDeg = ifelse(blk_adj_mat > 0, 1, 0)
-    ##                     }
-    ##                     else {
-    ##                       blk_adj_mat = this_adj_mat[j == thisBlk, 
-    ##                         k == thisBlk]
-    ##                       blk_adj_mat = matrix(blk_adj_mat, nrow = 1)
-    ##                       outDeg = .scaledDegree(blk_adj_mat)
-    ##                     }
+    ##         outdegree = .scaledDegree(adj_mat)
+    ##         nb = max(partition)
+    ##         reduced_degree = matrix(0, nrow = nb, ncol = nb)
+    ##         rownames(reduced_degree) = paste("Block", 1:nb)
+    ##         colnames(reduced_degree) = paste("Block", 1:nb)
+    ##         for (j in 1:nb) {
+    ##             nRows = sum(j == partition)
+    ##             for (k in 1:nb) {
+    ##                 nCols = sum(k == partition)
+    ##                 if (nRows == 1) {
+    ##                   if (nCols == 1) {
+    ##                     blk_adj_mat = adj_mat[j == partition, k == 
+    ##                       partition]
+    ##                     outDeg = ifelse(blk_adj_mat > 0, 1, 0)
     ##                   }
     ##                   else {
-    ##                     if (nCols == 1) {
-    ##                       blk_adj_mat = this_adj_mat[j == thisBlk, 
-    ##                         k == thisBlk]
-    ##                       blk_adj_mat = matrix(blk_adj_mat, ncol = 1)
-    ##                     }
-    ##                     else {
-    ##                       blk_adj_mat = this_adj_mat[j == thisBlk, 
-    ##                         k == thisBlk]
-    ##                     }
+    ##                     blk_adj_mat = adj_mat[j == partition, k == 
+    ##                       partition]
+    ##                     blk_adj_mat = matrix(blk_adj_mat, nrow = 1)
     ##                     outDeg = .scaledDegree(blk_adj_mat)
     ##                   }
-    ##                   reduced_degree[j, k] = outDeg
     ##                 }
+    ##                 else {
+    ##                   if (nCols == 1) {
+    ##                     blk_adj_mat = adj_mat[j == partition, k == 
+    ##                       partition]
+    ##                     blk_adj_mat = matrix(blk_adj_mat, ncol = 1)
+    ##                   }
+    ##                   else {
+    ##                     blk_adj_mat = adj_mat[j == partition, k == 
+    ##                       partition]
+    ##                   }
+    ##                   outDeg = .scaledDegree(blk_adj_mat)
+    ##                 }
+    ##                 reduced_degree[j, k] = outDeg
     ##             }
-    ##             temp1 <- reduced_degree
-    ##             temp1[is.nan(temp1)] <- 0
-    ##             temp1[temp1 < outdegree[[i]]] <- 0
-    ##             temp1[temp1 > 0] <- 1
-    ##             mat_return[[i]] <- temp1
     ##         }
+    ##         reduced_degree[is.nan(reduced_degree)] <- 0
+    ##         reduced_degree[reduced_degree < outdegree] <- 0
+    ##         reduced_degree[reduced_degree > 0] <- 1
     ##         return_list <- list()
-    ##         return_list$reduced_mat <- mat_return
+    ##         return_list$reduced_mat <- reduced_degree
     ##         return_list$deg <- outdegree
     ##         return(return_list)
     ##     }
@@ -198,4 +190,4 @@ make_reduced_from_partition
     ##         stop("Statistics implemented for determining edges in reduced networks are only \n         density and degree.")
     ##     }
     ## }
-    ## <bytecode: 0x562ca8056d88>
+    ## <bytecode: 0x55dea9500ba0>
