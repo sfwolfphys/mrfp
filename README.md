@@ -1,7 +1,7 @@
 Make Reduced From Partition
 ================
 Steven Wolf
-2020-12-08
+2020-12-09
 
 ## Setup for the new function `make_reduced_from_partition`
 
@@ -30,11 +30,17 @@ library(viridis)
     ## Loading required package: viridisLite
 
 ``` r
-source('mrfp.R')
+#source('mrfp.R')
 ```
 
-This function will be added to the `concorR` repository on my fork in
-the next few days.
+This function ~~will be~~ has been added to the `concorR` repository on
+my fork ~~in the next few days~~. The Travis status is:
+
+<!-- badges: start -->
+
+[![Travis build
+status](https://travis-ci.com/sfwolfphys/concorR.svg?branch=main)](https://travis-ci.com/sfwolfphys/concorR)
+<!-- badges: end -->
 
 ## Proof of concept
 
@@ -190,4 +196,5 @@ make_reduced_from_partition
     ##         stop("Statistics implemented for determining edges in reduced networks are only \n         density and degree.")
     ##     }
     ## }
-    ## <bytecode: 0x55dea9500ba0>
+    ## <bytecode: 0x55ce4cdc59c8>
+    ## <environment: namespace:concorR>

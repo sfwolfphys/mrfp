@@ -13,10 +13,13 @@ library(concorR)
 library(igraph)
 library(viridis)
 
-source('mrfp.R')
+#source('mrfp.R')
 ```
-This function will be added to the `concorR` repository on my fork in the next few days.
+This function ~~will be~~ has been added to the `concorR` repository on my fork ~~in the next few days~~.  The Travis status is:
 
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.com/sfwolfphys/concorR.svg?branch=main)](https://travis-ci.com/sfwolfphys/concorR)
+<!-- badges: end -->
 
 ## Proof of concept
 Note:  given the fact that we have an existing network/partition, I decided to make the input be a single adjacency matrix/partition rather than a list of adjacency matricies/partitions.  We want to have the list input for the other method because concor uses list inputs.  However, it is superfluous here.
